@@ -1,0 +1,5 @@
+artifacts/
+/.env
+/.idea
+/jingbot.sd.yml
+/Makefile-local
