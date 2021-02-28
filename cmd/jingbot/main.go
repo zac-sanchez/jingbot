@@ -21,14 +21,15 @@ func main() {
 	cfg := getConfig()
 	api := slack.New(cfg.APIKey)
 
-	channels, err := getBotChannels(cfg.BotID, api)
-	if err != nil {
-		zap.Error(err)
-		panic(err)
-	}
+	logger.Info("Started JingBot",
+		zap.String("Environment", cfg.Environment),
+		zap.String("cron string", cfg.Time),
+		zap.String("port", cfg.Port),
+		zap.Int("randomness interval in minutes", cfg.Minutes),
+	)
 
 	c := cron.New()
-	_, err = c.AddFunc(cfg.Time, jingFunc(logger, channels, api))
+	_, err := c.AddFunc(cfg.Time, worker(logger, api, cfg.Minutes))
 	if err != nil {
 		zap.Error(err)
 		panic(err)
@@ -46,13 +47,20 @@ func main() {
 
 }
 
-// Returns a function that posts a message as Jing
-func jingFunc(logger *zap.Logger, channels []slack.Channel, api *slack.Client) func() {
+// Returns a function that posts a message as bot user
+func worker(logger *zap.Logger, api *slack.Client, minutes int) func() {
 	return func() {
+		// TODO: Avoid running this every iteration by updating the store when bot is added to a new channel
+		channels, _, err := api.GetConversationsForUser(&slack.GetConversationsForUserParameters{})
+		if err != nil {
+			zap.Error(err)
+			panic(err)
+		}
 		for _, c := range channels {
-			channelID, timestamp, err := api.PostMessage(c.ID, slack.MsgOptionText(":remote-sleepy-morning:", false))
-			r := rand.Intn(10)
+			// Randomly wait some time between 0 - 10 minutes to post the update
+			r := rand.Intn(minutes)
 			time.Sleep(time.Duration(r) * time.Minute)
+			channelID, timestamp, err := api.PostMessage(c.ID, slack.MsgOptionText(":remote-sleepy-morning:", false))
 			if err != nil {
 				logger.Error("Error posting message",
 					zap.String("channel", channelID),
@@ -64,40 +72,4 @@ func jingFunc(logger *zap.Logger, channels []slack.Channel, api *slack.Client) f
 			logger.Info("Posted message", zap.String("channel", channelID), zap.String("timestamp", timestamp))
 		}
 	}
-}
-
-
-var blocklistedChannels = []string{
-	"general",
-	"announcements",
-}
-
-func filterChannel(ss []slack.Channel, test func(string) bool) (ret []slack.Channel) {
-	for _, s := range ss {
-		if test(s.Name) {
-			ret = append(ret, s)
-		}
-	}
-	return
-}
-
-func notBlocked(s string) bool {
-	for _, blocked := range blocklistedChannels {
-		if s == blocked {
-			return false
-		}
-	}
-	return true
-}
-
-// post only to channels other than general and announcement where JingBot is present.
-func getBotChannels(botID string, api *slack.Client) ([]slack.Channel, error) {
-	channels, _, err := api.GetConversationsForUser(&slack.GetConversationsForUserParameters{
-		UserID: botID,
-	})
-	if err != nil {
-		return []slack.Channel{}, err
-	}
-	channels = filterChannel(channels, notBlocked)
-	return channels, nil
 }

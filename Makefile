@@ -20,7 +20,6 @@ NEXT_VERSION := $(call bumpMinor,$(CURRENT_VERSION))
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-
 .PHONY: test
 test:
 	go test -v ./...
@@ -37,6 +36,16 @@ docker-compose-run: ## Run jingbot in docker-compose accompanied by statsd
 .PHONY: frontend
 frontend:
 	statik -src=$${PWD}/frontend/static -dest $${PWD}/pkg/web/
+
+.PHONY: prod-docker-image
+prod-docker-image: cmd/jingbot/*.go
+	## Store your production build instructions in ./Makefile-local
+	make -f Makefile-local prod-docker-image
+
+.PHONY: prod-push
+prod-push:
+	## Store your production push instructions in ./Makefile-local
+	make -f Makefile-local docker-push
 
 .PHONY: get-next-version
 get-next-version:

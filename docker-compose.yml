@@ -2,8 +2,7 @@ version: '3'
 services:
   jingbot:
     image: ${IMAGE_NAME}:${GIT_HASH}
+    env_file:
+      - ./.env
     ports:
       - 8080:8080
-    environment:
-      - PORT=8080
-      - JINGBOT_TIME=* * * * *
