@@ -22,7 +22,7 @@ type HelloPayload struct {
 }
 
 type SchedulePayload struct {
-	Randomness     string `json:"random_interval"`
+	Randomness     string `json:"random_waiting_minutes"`
 	CronExpression string `json:"cron_expression"`
 }
 
