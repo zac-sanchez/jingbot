@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JingBot</title>
+</head>
+<body>
+
+<h1>{{ .PageTitle}}</h1>
+{{ range $value := .Endpoints }}
+    <li><a href={{ $value }}>{{ $value }}</a></li>
+{{ end }}
+
+</body>
+</html>

@@ -19,9 +19,6 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-RUN go get github.com/rakyll/statik
-RUN	statik -f -src=/app/frontend/static -dest /app/pkg/web/
-
 # Run tests and verify directory structure
 RUN go vet /app/...
 RUN go generate /app/...

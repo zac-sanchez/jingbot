@@ -6,12 +6,12 @@ import (
 )
 
 type Config struct {
-	APIKey string
+	APIKey      string
 	Environment string
-	BotID  string
-	Minutes int
-	Time   string
-	Port   string
+	BotID       string
+	Minutes     int
+	Time        string
+	Port        string
 }
 
 func getConfig() *Config {
@@ -26,18 +26,18 @@ func getConfig() *Config {
 	}
 
 	cfg := &Config{
-		Time:   os.Getenv("JINGBOT_TIME"),
-		Port: 	os.Getenv("PORT"),
+		Time:        os.Getenv("JINGBOT_TIME"),
+		Port:        os.Getenv("PORT"),
 		Environment: os.Getenv("JINGBOT_ENVIRONMENT"),
-		Minutes: minutes,
+		Minutes:     minutes,
 	}
 
 	if cfg.Environment == "prod" {
 		cfg.APIKey = os.Getenv("JINGBOT_PROD_API_KEY")
-		cfg.BotID =  os.Getenv("JINGBOT_PROD_USER_ID")
+		cfg.BotID = os.Getenv("JINGBOT_PROD_USER_ID")
 	} else {
 		cfg.APIKey = os.Getenv("JINGBOT_DEV_API_KEY")
-		cfg.BotID =  os.Getenv("JINGBOT_DEV_USER_ID")
+		cfg.BotID = os.Getenv("JINGBOT_DEV_USER_ID")
 	}
 
 	return cfg
